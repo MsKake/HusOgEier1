@@ -28,16 +28,63 @@ namespace DataTableSample
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                SqlCommand cmd = new SqlCommand("SELECT count(BoligId) from Bolig", conn);
+                SqlCommand cmd = new SqlCommand("SELECT count(bid) from Bolig", conn);
                 cmd.CommandType = CommandType.Text;
                 int num = (Int32)cmd.ExecuteScalar();//returner den første raden og den første kolonnen. sjekk i sql manager. Unboxing eksempel.
 
                 conn.Close();
                 return num;
             }
-            
         }
 
-       
+        protected void ButtonSearchByPhone_Click(object sender, EventArgs e)
+        {
+            //her kommer db-metoden
+            //bind til gridview
+            //GridViewBoligEiere.DataSource=datatable
+            //GridViewBoligEiere.DataBind();
+
+            //kalle på metoden i DBLayer
+            DBLayer layer = new DBLayer();
+            GridViewBoligEiere.DataSource=layer.GetBoligAndOwnersByTelefon(TextBoxSearchByPhone.Text);
+            GridViewBoligEiere.DataBind();
+        }
+
+        protected void ButtonSearchMail_Click(object sender, EventArgs e)
+        {
+            DBLayer layer = new DBLayer();
+            GridViewBoligEiere.DataSource = layer.GetBoligAndOwnersByMail(TextBoxMail.Text);
+            GridViewBoligEiere.DataBind();
+        }
+
+
+        protected void ButtonShowAllBoliger_Click(object sender, EventArgs e)
+        {
+            DBLayer dbl=new DBLayer();
+            GridViewBoligEiere.DataSource = dbl.GetAllBoligs();
+            GridViewBoligEiere.DataBind();
+        }
+
+
+        private DataTable GetAllBoligs()
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["BoligEier"].ConnectionString;
+            DataTable dt = new DataTable();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("SELECT * FROM Bolig", conn);
+                cmd.CommandType = CommandType.Text;
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                dt.Load(reader);
+
+                reader.Close();
+                conn.Close();
+            }
+                return dt;
+        }
     }
 }
